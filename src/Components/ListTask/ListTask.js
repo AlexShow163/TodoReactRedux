@@ -1,77 +1,111 @@
 import React from 'react';
+
+
 import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
-
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import FolderIcon from '@material-ui/icons/Folder';
+import CloseIcon from '@material-ui/icons/Close'
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 
 
-const useStyles = makeStyles((theme) => ({
+import {useDispatch, useSelector} from "react-redux";
+import {toggleIsDoneTask, deleteClickTask} from '../../Redux/actions/taskActions'
+
+
+
+
+
+const useStyles = makeStyles(() => ({
     root: {
         flexGrow: 1,
-        maxWidth: 752,
+        maxWidth: 768
     },
-    demo: {
-        backgroundColor: theme.palette.background.paper,
+    items: {
+        paddingLeft: 0,
+        paddingBottom:0,
+        paddingTop:0
     },
-    title: {
-        margin: theme.spacing(4, 0, 2),
-    },
+
 }));
 
 
 
-export default  function List () {
+
+
+
+
+export default  function ListTask () {
+    const listTaskItem = useSelector(state => state.taskReducer.task)
+    const dispatch = useDispatch()
     const classes = useStyles();
 
 
-    function generate(element) {
-        return [0, 1, 2].map((value) =>
-            React.cloneElement(element, {
-                key: value,
-            }),
-        );
+
+
+    const toggleTask = arr => dispatch(toggleIsDoneTask(arr))
+    const deleteTask = arr => dispatch(deleteClickTask(arr))
+
+    const toggleIsDone = (item) => {
+        item.isDone = !item.isDone
+        let arrTask = [...listTaskItem]
+        toggleTask(arrTask)
     }
+
+    const deleteTaskIcon = (item) => {
+        let arrDelTask = listTaskItem.filter((el) => el.id !== item.id)
+        console.log(arrDelTask)
+        deleteTask(arrDelTask)
+    }
+
+
     return (
-        <div className={classes.root}>
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
-                    <Typography variant="h6" className={classes.title}>
-                        Avatar with text and icon
-                    </Typography>
-                    <div className={classes.demo}>
-                        <List>
-                            {generate(
-                                <ListItem>
-                                    <ListItemAvatar>
-                                        <Avatar>
-                                            <FolderIcon/>
-                                        </Avatar>
-                                    </ListItemAvatar>
-                                    <ListItemText
-                                        primary="Single-line item"
-                                    />
-                                    <ListItemSecondaryAction>
-                                        <IconButton edge="end" aria-label="delete">
-                                            <DeleteIcon/>
+        <div  className={classes.root}>
+            <Grid container
+                  direction="row"
+                  justify='space-between'
+                  spacing={2}
+            >
+                <Grid
+                    item xs={12} md={12}
+                >
+                    <div >
+                        <List >
+                            {listTaskItem.map((item) => {
+                                return (
+                                    <ListItem key={item.id} className={classes.items}>
+                                        <IconButton onClick={() => toggleIsDone(item)} >
+                                            {item.isDone
+                                                ? <CheckCircleOutlineIcon
+                                                    className={classes.greenColor}
+                                                    fontSize='large'
+                                                />
+                                                : <CloseIcon
+                                                color="secondary"
+                                                fontSize='large'
+                                                />
+                                            }
                                         </IconButton>
-                                    </ListItemSecondaryAction>
-                                </ListItem>,
-                            )}
+                                        <ListItemText>{item.title}</ListItemText>
+                                        <ListItemSecondaryAction>
+                                            <IconButton onClick={() => deleteTaskIcon(item)} edge="end" aria-label="delete">
+                                                <DeleteIcon/>
+                                            </IconButton>
+                                        </ListItemSecondaryAction>
+                                    </ListItem>
+                                )
+                            })}
                         </List>
                     </div>
                 </Grid>
             </Grid>
         </div>
+
+
     )
 }
